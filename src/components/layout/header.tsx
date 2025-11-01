@@ -91,14 +91,8 @@ export function Header() {
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="text-muted-foreground">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M4 11a8 8 0 0 1 8 8" />
-                                <path d="M4 4a8 8 0 0 1 8 8" />
-                                <path d="m13 19-3 3 3 3" />
-                                <path d="M12 2v1" />
-                                <path d="M12 5v1" />
-                                <path d="M12 8v1" />
-                                <path d="M18.7 11.3a4.4 4.4 0 0 0-2.5-3.8 4.4 4.4 0 0 0-3.8-2.5" />
-                                <path d="M12 12.5a4.4 4.4 0 0 1-2.5 3.8 4.4 4.4 0 0 1-3.8 2.5" />
+                                <text x="4" y="16" fontSize="12" fill="currentColor">A</text>
+                                <text x="14" y="16" fontSize="12" fill="currentColor">অ</text>
                             </svg>
                             <span className="sr-only">Toggle language</span>
                         </Button>
