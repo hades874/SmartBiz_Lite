@@ -81,7 +81,6 @@ export function AppSidebar() {
                             </SidebarMenuButton>
                         </Link>
                     </SidebarMenuItem>
-                    <SidebarSeparator />
                     <SidebarMenuItem>
                         <Link href="/settings">
                             <SidebarMenuButton
