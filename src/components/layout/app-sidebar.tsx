@@ -74,7 +74,7 @@ export function AppSidebar() {
                             <SidebarMenuButton
                                 isActive={pathname === '/agent'}
                                 tooltip="AI Agent"
-                                className="bg-accent/20 text-accent-foreground hover:bg-accent/30 data-[active=true]:bg-accent data-[active=true]:text-accent-foreground border border-accent/40"
+                                className="bg-accent/80 text-accent-foreground hover:bg-accent/90 data-[active=true]:bg-accent data-[active=true]:text-accent-foreground border border-accent/40"
                             >
                                 <Bot />
                                 <span>AI Agent</span>
