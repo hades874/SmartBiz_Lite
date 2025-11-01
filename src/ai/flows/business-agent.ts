@@ -9,20 +9,10 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { salesDataSchema, inventoryDataSchema, customerDataSchema } from '@/lib/schemas';
+import { salesDataSchema, inventoryDataSchema, customerDataSchema, BusinessAgentInputSchema, BusinessAgentOutputSchema } from '@/lib/schemas';
 
 
-export const BusinessAgentInputSchema = z.object({
-  query: z.string().describe('The user\'s question or message to the agent.'),
-  salesData: z.array(salesDataSchema).describe('An array of sales records.'),
-  inventoryData: z.array(inventoryDataSchema).describe('An array of inventory items.'),
-  customerData: z.array(customerDataSchema).describe('An array of customer data.'),
-});
 export type BusinessAgentInput = z.infer<typeof BusinessAgentInputSchema>;
-
-export const BusinessAgentOutputSchema = z.object({
-  response: z.string().describe('The AI agent\'s response to the user\'s query.'),
-});
 export type BusinessAgentOutput = z.infer<typeof BusinessAgentOutputSchema>;
 
 export async function askBusinessAgent(input: BusinessAgentInput): Promise<BusinessAgentOutput> {
