@@ -3,14 +3,13 @@
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { Search, Bell, Globe, Languages } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
-import { PlaceHolderImages } from "@/lib/placeholder-images"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { Search, Bell, Languages } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import React from "react";
+import { useLanguage, strings } from "@/context/language-context";
 
 
 function toTitleCase(str: string) {
@@ -21,9 +20,33 @@ function toTitleCase(str: string) {
 }
 
 export function Header() {
-    const userAvatar = PlaceHolderImages.find(p => p.id === 'avatar-1');
     const pathname = usePathname();
     const segments = pathname.split('/').filter(Boolean);
+    const { language, setLanguage } = useLanguage();
+    const t = strings[language];
+
+    const getPageTitle = (segment: string) => {
+        switch (segment) {
+            case 'dashboard':
+                return t.dashboard;
+            case 'forecast':
+                return t.salesForecasting;
+            case 'inventory':
+                return t.inventory;
+            case 'cashflow':
+                return t.cashFlow;
+            case 'customers':
+                return t.customers;
+            case 'reports':
+                return t.reports;
+            case 'agent':
+                return t.aiAgent;
+            case 'settings':
+                return t.settings;
+            default:
+                return toTitleCase(segment);
+        }
+    }
 
     return (
         <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
@@ -41,11 +64,11 @@ export function Header() {
                                 <BreadcrumbSeparator />
                                 <BreadcrumbItem>
                                 {index === segments.length - 1 ? (
-                                    <BreadcrumbPage>{toTitleCase(segment)}</BreadcrumbPage>
+                                    <BreadcrumbPage>{getPageTitle(segment)}</BreadcrumbPage>
                                 ) : (
                                     <BreadcrumbLink asChild>
                                         <Link href={`/${segments.slice(0, index + 1).join('/')}`}>
-                                            {toTitleCase(segment)}
+                                            {getPageTitle(segment)}
                                         </Link>
                                     </BreadcrumbLink>
                                 )}
@@ -72,8 +95,8 @@ export function Header() {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem>English</DropdownMenuItem>
-                        <DropdownMenuItem>বাংলা</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => setLanguage('en')}>English</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => setLanguage('bn')}>বাংলা</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
 

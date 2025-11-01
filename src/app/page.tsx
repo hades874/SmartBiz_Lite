@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -11,6 +12,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { useLanguage, strings } from '@/context/language-context';
 
 export default function LoginPage() {
   const loginBg = PlaceHolderImages.find(image => image.id === 'login-bg-1');
@@ -19,6 +21,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { language } = useLanguage();
+  const t = strings[language];
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,16 +71,16 @@ export default function LoginPage() {
         <div className="mx-auto grid w-[350px] gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">Login</CardTitle>
+              <CardTitle className="text-2xl">{t.loginTitle}</CardTitle>
               <CardDescription>
-                Enter your email below to login to your account
+                {t.loginDescription}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLogin}>
                 <div className="grid gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t.emailLabel}</Label>
                     <Input
                       id="email"
                       type="email"
@@ -89,12 +93,12 @@ export default function LoginPage() {
                   </div>
                   <div className="grid gap-2">
                     <div className="flex items-center">
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor="password">{t.passwordLabel}</Label>
                       <Link
                         href="#"
                         className="ml-auto inline-block text-sm underline"
                       >
-                        Forgot your password?
+                        {t.forgotPasswordLink}
                       </Link>
                     </div>
                     <Input 
@@ -108,17 +112,17 @@ export default function LoginPage() {
                   </div>
                     <Button type="submit" className="w-full" disabled={loading}>
                       {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                      Login
+                      {t.loginButton}
                     </Button>
                   <Button variant="outline" className="w-full" disabled={loading}>
-                    Login with Google
+                    {t.loginWithGoogleButton}
                   </Button>
                 </div>
               </form>
               <div className="mt-4 text-center text-sm">
-                Don&apos;t have an account?{' '}
+                {t.signupPrompt}{' '}
                 <Link href="#" className="underline">
-                  Sign up
+                  {t.signupLink}
                 </Link>
               </div>
             </CardContent>

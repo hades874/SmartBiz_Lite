@@ -7,7 +7,6 @@ import {
     SidebarMenu,
     SidebarMenuItem,
     SidebarMenuButton,
-    SidebarSeparator,
 } from "@/components/ui/sidebar"
 import {
     LayoutDashboard,
@@ -28,19 +27,22 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import { Button } from "../ui/button"
-
-const navItems = [
-    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { href: "/forecast", icon: BarChart3, label: "Sales Forecasting" },
-    { href: "/inventory", icon: Package, label: "Inventory" },
-    { href: "/cashflow", icon: Banknote, label: "Cash Flow" },
-    { href: "/customers", icon: Users2, label: "Customers" },
-    { href: "/reports", icon: FileText, label: "Reports" },
-]
+import { useLanguage, strings } from "@/context/language-context"
 
 export function AppSidebar() {
     const pathname = usePathname()
     const userAvatar = PlaceHolderImages.find(p => p.id === 'avatar-1')
+    const { language } = useLanguage();
+    const t = strings[language];
+
+    const navItems = [
+        { href: "/dashboard", icon: LayoutDashboard, label: t.dashboard },
+        { href: "/forecast", icon: BarChart3, label: t.salesForecasting },
+        { href: "/inventory", icon: Package, label: t.inventory },
+        { href: "/cashflow", icon: Banknote, label: t.cashFlow },
+        { href: "/customers", icon: Users2, label: t.customers },
+        { href: "/reports", icon: FileText, label: t.reports },
+    ]
 
     return (
         <Sidebar>
@@ -73,11 +75,11 @@ export function AppSidebar() {
                         <Link href="/agent">
                             <SidebarMenuButton
                                 isActive={pathname === '/agent'}
-                                tooltip="AI Agent"
+                                tooltip={t.aiAgent}
                                 className="bg-accent/80 text-accent-foreground hover:bg-accent/90 data-[active=true]:bg-accent data-[active=true]:text-accent-foreground border border-accent/40"
                             >
                                 <Bot />
-                                <span>AI Agent</span>
+                                <span>{t.aiAgent}</span>
                             </SidebarMenuButton>
                         </Link>
                     </SidebarMenuItem>
@@ -85,10 +87,10 @@ export function AppSidebar() {
                         <Link href="/settings">
                             <SidebarMenuButton
                                 isActive={pathname === '/settings'}
-                                tooltip="Settings"
+                                tooltip={t.settings}
                             >
                                 <Settings />
-                                <span>Settings</span>
+                                <span>{t.settings}</span>
                             </SidebarMenuButton>
                         </Link>
                     </SidebarMenuItem>
