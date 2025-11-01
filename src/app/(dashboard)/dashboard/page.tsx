@@ -1,35 +1,41 @@
+
+'use client';
 import { DollarSign, Package, Users, CreditCard } from 'lucide-react'
 import { StatCard } from '@/components/dashboard/stat-card'
 import { SalesChart } from '@/components/dashboard/sales-chart'
 import { RecentSales } from '@/components/dashboard/recent-sales'
 import { InventoryAlerts } from '@/components/dashboard/inventory-alerts'
+import { useLanguage, strings } from '@/context/language-context';
 
 export default function DashboardPage() {
+  const { language } = useLanguage();
+  const t = strings[language];
+
   return (
     <div className="flex flex-col gap-4 md:gap-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <StatCard 
-                title="Total Revenue"
+                title={t.totalRevenue}
                 value="৳45,231.89"
-                description="+20.1% from last month"
+                description={t.totalRevenueDescription}
                 Icon={DollarSign}
             />
             <StatCard 
-                title="Active Customers"
+                title={t.activeCustomers}
                 value="+2350"
-                description="+180.1% from last month"
+                description={t.activeCustomersDescription}
                 Icon={Users}
             />
             <StatCard 
-                title="Stock Value"
+                title={t.stockValue}
                 value="৳1,234,567"
-                description="Total value of current inventory"
+                description={t.stockValueDescription}
                 Icon={Package}
             />
             <StatCard 
-                title="Pending Payments"
+                title={t.pendingPayments}
                 value="৳57,300"
-                description="From 12 invoices"
+                description={t.pendingPaymentsDescription}
                 Icon={CreditCard}
             />
         </div>

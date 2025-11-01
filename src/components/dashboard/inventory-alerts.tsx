@@ -1,3 +1,5 @@
+
+'use client';
 import {
     Card,
     CardContent,
@@ -8,19 +10,28 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { mockInventory } from "@/lib/data"
 import { cn } from "@/lib/utils"
+import { useLanguage, strings } from "@/context/language-context";
 
 export function InventoryAlerts() {
+    const { language } = useLanguage();
+    const t = strings[language];
     const alerts = mockInventory.filter(item => item.status !== 'ok');
+
+    const getStatusText = (status: 'low' | 'overstock') => {
+        if (status === 'low') return t.lowStock;
+        if (status === 'overstock') return t.overstock;
+        return status;
+    }
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Inventory Alerts</CardTitle>
-                <CardDescription>Items that need your attention.</CardDescription>
+                <CardTitle>{t.inventoryAlerts}</CardTitle>
+                <CardDescription>{t.inventoryAlertsDescription}</CardDescription>
             </CardHeader>
             <CardContent>
                 {alerts.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">All inventory levels are looking good!</p>
+                    <p className="text-sm text-muted-foreground">{t.inventoryAlertsEmpty}</p>
                 ) : (
                     <div className="space-y-4">
                         {alerts.map((item) => (
@@ -34,7 +45,7 @@ export function InventoryAlerts() {
                                 <Badge variant={item.status === 'low' ? 'destructive' : 'secondary'} className={cn(
                                     item.status === 'overstock' && 'bg-amber-500 text-white'
                                 )}>
-                                    {item.status === 'low' ? 'Low Stock' : 'Overstock'}
+                                    {getStatusText(item.status)}
                                 </Badge>
                             </div>
                         ))}

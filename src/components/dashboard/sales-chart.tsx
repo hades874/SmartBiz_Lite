@@ -1,3 +1,4 @@
+
 "use client"
 import React from 'react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
@@ -10,6 +11,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
+import { useLanguage, strings } from '@/context/language-context';
+
 
 const generateMockSalesData = () => [
     { month: "January", total: Math.floor(Math.random() * 5000) + 1000 },
@@ -35,12 +38,14 @@ const chartConfig = {
   }
 
 export function SalesChart() {
+  const { language } = useLanguage();
+  const t = strings[language];
   const mockSalesDataForChart = React.useMemo(() => generateMockSalesData(), []);
   return (
     <Card>
         <CardHeader>
-            <CardTitle>Sales Overview</CardTitle>
-            <CardDescription>An overview of your sales for the last year.</CardDescription>
+            <CardTitle>{t.salesOverview}</CardTitle>
+            <CardDescription>{t.salesOverviewDescription}</CardDescription>
         </CardHeader>
         <CardContent>
              <ChartContainer config={chartConfig} className="h-[300px] w-full">

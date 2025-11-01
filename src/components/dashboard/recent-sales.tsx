@@ -1,3 +1,5 @@
+
+'use client';
 import {
     Avatar,
     AvatarFallback,
@@ -11,13 +13,16 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { mockSales } from "@/lib/data"
+import { useLanguage, strings } from "@/context/language-context";
 
 export function RecentSales() {
+    const { language } = useLanguage();
+    const t = strings[language];
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Recent Sales</CardTitle>
-                <CardDescription>You made {mockSales.length} sales this month.</CardDescription>
+                <CardTitle>{t.recentSales}</CardTitle>
+                <CardDescription>{t.recentSalesDescription(mockSales.length)}</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="space-y-8">

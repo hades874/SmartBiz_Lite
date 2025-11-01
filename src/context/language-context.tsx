@@ -24,6 +24,23 @@ type Translations = {
         loginWithGoogleButton: string;
         signupPrompt: string;
         signupLink: string;
+        totalRevenue: string;
+        totalRevenueDescription: string;
+        activeCustomers: string;
+        activeCustomersDescription: string;
+        stockValue: string;
+        stockValueDescription: string;
+        pendingPayments: string;
+        pendingPaymentsDescription: string;
+        salesOverview: string;
+        salesOverviewDescription: string;
+        recentSales: string;
+        recentSalesDescription: (count: number) => string;
+        inventoryAlerts: string;
+        inventoryAlertsDescription: string;
+        inventoryAlertsEmpty: string;
+        lowStock: string;
+        overstock: string;
     };
 };
 
@@ -46,6 +63,23 @@ export const strings: Translations = {
         loginWithGoogleButton: 'Login with Google',
         signupPrompt: "Don't have an account?",
         signupLink: 'Sign up',
+        totalRevenue: 'Total Revenue',
+        totalRevenueDescription: '+20.1% from last month',
+        activeCustomers: 'Active Customers',
+        activeCustomersDescription: '+180.1% from last month',
+        stockValue: 'Stock Value',
+        stockValueDescription: 'Total value of current inventory',
+        pendingPayments: 'Pending Payments',
+        pendingPaymentsDescription: 'From 12 invoices',
+        salesOverview: 'Sales Overview',
+        salesOverviewDescription: 'An overview of your sales for the last year.',
+        recentSales: 'Recent Sales',
+        recentSalesDescription: (count) => `You made ${count} sales this month.`,
+        inventoryAlerts: 'Inventory Alerts',
+        inventoryAlertsDescription: 'Items that need your attention.',
+        inventoryAlertsEmpty: 'All inventory levels are looking good!',
+        lowStock: 'Low Stock',
+        overstock: 'Overstock',
     },
     bn: {
         dashboard: 'ড্যাশবোর্ড',
@@ -65,6 +99,23 @@ export const strings: Translations = {
         loginWithGoogleButton: 'Google দিয়ে লগইন করুন',
         signupPrompt: 'অ্যাকাউন্ট নেই?',
         signupLink: 'সাইন আপ করুন',
+        totalRevenue: 'মোট রাজস্ব',
+        totalRevenueDescription: 'গত মাস থেকে +২০.১%',
+        activeCustomers: 'সক্রিয় গ্রাহক',
+        activeCustomersDescription: 'গত মাস থেকে +১৮০.১%',
+        stockValue: 'স্টকের মূল্য',
+        stockValueDescription: 'বর্তমান ইনভেন্টরির মোট মূল্য',
+        pendingPayments: 'মুলতবি পেমেন্ট',
+        pendingPaymentsDescription: '১২টি চালান থেকে',
+        salesOverview: 'বিক্রয় ওভারভিউ',
+        salesOverviewDescription: 'গত বছরের আপনার বিক্রয়ের একটি ওভারভিউ।',
+        recentSales: 'সাম্প্রতিক বিক্রয়',
+        recentSalesDescription: (count) => `আপনি এই মাসে ${count}টি বিক্রয় করেছেন।`,
+        inventoryAlerts: 'ইনভেন্টরি সতর্কতা',
+        inventoryAlertsDescription: 'যে আইটেমগুলিতে আপনার মনোযোগ প্রয়োজন।',
+        inventoryAlertsEmpty: 'সমস্ত ইনভেন্টরি লেভেল ভাল দেখাচ্ছে!',
+        lowStock: 'কম স্টক',
+        overstock: 'অতিরিক্ত স্টক',
     },
 };
 
