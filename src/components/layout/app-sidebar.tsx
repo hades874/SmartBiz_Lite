@@ -1,4 +1,5 @@
 
+
 'use client'
 import {
     Sidebar,
@@ -68,7 +69,7 @@ export function AppSidebar() {
             </SidebarContent>
             <SidebarFooter>
                 <SidebarMenu className="p-2">
-                     <SidebarMenuItem>
+                    <SidebarMenuItem>
                         <Link href="/settings">
                             <SidebarMenuButton
                                 isActive={pathname === '/settings'}
@@ -98,12 +99,14 @@ export function AppSidebar() {
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-56 mb-2 ml-4">
-                            <div className="p-1">
-                                <Button variant="ghost" className="w-full justify-start">
-                                    <LogOut className="mr-2 h-4 w-4"/>
-                                    Logout
-                                </Button>
-                            </div>
+                            <SidebarMenu>
+                                <SidebarMenuItem>
+                                    <Button variant="ghost" className="w-full justify-start">
+                                        <LogOut className="mr-2 h-4 w-4"/>
+                                        Logout
+                                    </Button>
+                                </SidebarMenuItem>
+                            </SidebarMenu>
                         </PopoverContent>
                     </Popover>
                 </div>
