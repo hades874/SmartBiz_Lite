@@ -4,7 +4,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { Search, Bell, Languages } from "lucide-react"
+import { Search, Bell } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
@@ -90,7 +90,18 @@ export function Header() {
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="text-muted-foreground">
-                            <Languages className="h-5 w-5" />
+                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="m5 8 6 6"/>
+                                <path d="m4 14 6-6 2-3"/>
+                                <path d="M2 5h12"/>
+                                <path d="M7 2h1"/>
+                                <path d="m22 22-1.25-1.25"/>
+                                <path d="m17 17-2.5-2.5"/>
+                                <path d="m14 14-.75-.75"/>
+                                <path d="M11 11H4"/>
+                                <path d="M20.5 10.5c-1.5-1-2.5-3-2.5-5"/>
+                                <path d="M18 10h-2"/>
+                            </svg>
                             <span className="sr-only">Toggle language</span>
                         </Button>
                     </DropdownMenuTrigger>
