@@ -4,11 +4,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { generateReport, type GenerateReportOutput } from "@/ai/flows/automated-reports";
 import React from "react";
-import { mockSales, mockInventory } from "@/lib/data";
+import { getSales, getInventory, getCustomers } from "@/lib/sheets";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { mockCustomers } from "@/lib/data";
 import { useLanguage, strings } from "@/context/language-context";
 
 export default function ReportsPage() {
@@ -24,11 +23,16 @@ export default function ReportsPage() {
         setError(null);
         setResult(null);
         try {
+            const [sales, inventory, customers] = await Promise.all([
+                getSales(),
+                getInventory(),
+                getCustomers(),
+            ]);
             const res = await generateReport({
-                salesData: JSON.stringify(mockSales),
-                inventoryData: JSON.stringify(mockInventory),
+                salesData: JSON.stringify(sales),
+                inventoryData: JSON.stringify(inventory),
                 paymentData: JSON.stringify([]), // Assuming no separate payment data for now
-                customerData: JSON.stringify(mockCustomers),
+                customerData: JSON.stringify(customers),
                 reportPeriod,
             });
             setResult(res);

@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bot, Loader2, Send, User } from 'lucide-react';
 import { askBusinessAgent } from '@/ai/flows/business-agent';
-import { mockSales, mockInventory, mockCustomers } from '@/lib/data';
+import { getSales, getInventory, getCustomers } from '@/lib/sheets';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useLanguage, strings } from '@/context/language-context';
@@ -58,11 +58,17 @@ export default function AgentPage() {
         setError(null);
 
         try {
+            const [salesData, inventoryData, customerData] = await Promise.all([
+                getSales(),
+                getInventory(),
+                getCustomers(),
+            ]);
+
             const response = await askBusinessAgent({
                 query: input,
-                salesData: mockSales,
-                inventoryData: mockInventory,
-                customerData: mockCustomers,
+                salesData: salesData,
+                inventoryData: inventoryData,
+                customerData: customerData,
             });
             const aiMessage: Message = { id: `ai-${Date.now()}`, text: response.response, sender: 'ai' };
             setMessages(prev => [...prev, aiMessage]);

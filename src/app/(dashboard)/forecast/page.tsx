@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { salesForecasting, type SalesForecastingOutput } from "@/ai/flows/sales-forecasting";
 import React from "react";
-import { mockSales } from "@/lib/data";
+import { getSales } from "@/lib/sheets";
 import { Loader2, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -23,7 +23,8 @@ export default function ForecastPage() {
         setError(null);
         setResult(null);
         try {
-            const res = await salesForecasting({ salesData: mockSales });
+            const sales = await getSales();
+            const res = await salesForecasting({ salesData: sales });
             setResult(res);
         } catch (e: any) {
             setError(e.message || "An error occurred.");

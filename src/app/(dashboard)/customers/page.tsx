@@ -5,7 +5,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { customerSegmentation, type CustomerSegmentationOutput } from "@/ai/flows/customer-segmentation";
 import React from "react";
-import { mockCustomers } from "@/lib/data";
+import { getCustomers } from "@/lib/sheets";
+import type { Customer } from "@/types";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -15,17 +16,35 @@ import { useLanguage, strings } from "@/context/language-context";
 
 export default function CustomersPage() {
     const [loading, setLoading] = React.useState(false);
+    const [isCustomerLoading, setIsCustomerLoading] = React.useState(true);
+    const [customers, setCustomers] = React.useState<Customer[]>([]);
     const [result, setResult] = React.useState<CustomerSegmentationOutput | null>(null);
     const [error, setError] = React.useState<string | null>(null);
     const { language } = useLanguage();
     const t = strings[language];
+
+    const fetchCustomers = async () => {
+        setIsCustomerLoading(true);
+        try {
+            const data = await getCustomers();
+            setCustomers(data);
+        } catch (err: any) {
+            setError(err.message || 'Failed to load customers.');
+        } finally {
+            setIsCustomerLoading(false);
+        }
+    };
+
+    React.useEffect(() => {
+        fetchCustomers();
+    }, []);
 
     const handleAnalyzeCustomers = async () => {
         setLoading(true);
         setError(null);
         setResult(null);
         try {
-            const res = await customerSegmentation({ customerData: mockCustomers });
+            const res = await customerSegmentation({ customerData: customers });
             setResult(res);
         } catch (e: any) {
             setError(e.message || "An error occurred.");
@@ -50,12 +69,12 @@ export default function CustomersPage() {
     };
     
     const customersWithSegments = React.useMemo(() => {
-        if (!result) return mockCustomers;
-        return mockCustomers.map(customer => {
+        if (!result) return customers;
+        return customers.map(customer => {
             const segmentInfo = result.find(r => r.id === customer.id);
             return { ...customer, segment: segmentInfo?.segment };
         });
-    }, [result]);
+    }, [result, customers]);
 
     return (
         <div className="space-y-6">
@@ -65,14 +84,14 @@ export default function CustomersPage() {
                     <CardDescription>{t.customersDescription}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                     <Button onClick={handleAnalyzeCustomers} disabled={loading} type="button">
+                     <Button onClick={handleAnalyzeCustomers} disabled={loading || isCustomerLoading} type="button">
                         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                         {t.analyzeCustomers}
                     </Button>
                 </CardContent>
             </Card>
             
-            {loading && (
+            {(loading || isCustomerLoading) && (
                  <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                  </div>
@@ -85,44 +104,46 @@ export default function CustomersPage() {
                 </Alert>
             )}
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t.customerList}</CardTitle>
-                    <CardDescription>
-                        {result ? t.customerListDescriptionWithSegments : t.customerListDescription}
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>{t.customerName}</TableHead>
-                                <TableHead>{t.totalSpent}</TableHead>
-                                <TableHead>{t.lastPurchase}</TableHead>
-                                <TableHead>{t.segment}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {customersWithSegments.map((customer) => (
-                                <TableRow key={customer.id}>
-                                    <TableCell className="font-medium">{customer.name}</TableCell>
-                                    <TableCell>৳{customer.totalSpent.toLocaleString()}</TableCell>
-                                    <TableCell>{new Date(customer.lastPurchase).toLocaleDateString()}</TableCell>
-                                    <TableCell>
-                                        {customer.segment ? (
-                                            <Badge variant={getSegmentVariant(customer.segment)} className={cn(customer.segment === 'high-value' && 'bg-green-600', 'capitalize')}>
-                                                {customer.segment.replace('-', ' ')}
-                                            </Badge>
-                                        ) : (
-                                            <span className="text-muted-foreground">N/A</span>
-                                        )}
-                                    </TableCell>
+            {!isCustomerLoading && !error && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>{t.customerList}</CardTitle>
+                        <CardDescription>
+                            {result ? t.customerListDescriptionWithSegments : t.customerListDescription}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>{t.customerName}</TableHead>
+                                    <TableHead>{t.totalSpent}</TableHead>
+                                    <TableHead>{t.lastPurchase}</TableHead>
+                                    <TableHead>{t.segment}</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                            </TableHeader>
+                            <TableBody>
+                                {customersWithSegments.map((customer) => (
+                                    <TableRow key={customer.id}>
+                                        <TableCell className="font-medium">{customer.name}</TableCell>
+                                        <TableCell>৳{customer.totalSpent.toLocaleString()}</TableCell>
+                                        <TableCell>{new Date(customer.lastPurchase).toLocaleDateString()}</TableCell>
+                                        <TableCell>
+                                            {customer.segment ? (
+                                                <Badge variant={getSegmentVariant(customer.segment)} className={cn(customer.segment === 'high-value' && 'bg-green-600', 'capitalize')}>
+                                                    {customer.segment.replace('-', ' ')}
+                                                </Badge>
+                                            ) : (
+                                                <span className="text-muted-foreground">N/A</span>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            )}
         </div>
     );
 }

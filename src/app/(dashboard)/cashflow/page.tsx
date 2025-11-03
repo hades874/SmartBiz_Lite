@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { trackCashFlow, type CashFlowOutput } from "@/ai/flows/cash-flow-tracking";
 import React from "react";
-import { mockSales } from "@/lib/data";
+import { getSales } from "@/lib/sheets";
 import type { Payment } from "@/types";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -68,7 +68,8 @@ export default function CashflowPage() {
         setError(null);
         setResult(null);
         try {
-            const payments = transformSalesToPayments(mockSales);
+            const sales = await getSales();
+            const payments = transformSalesToPayments(sales);
             const res = await trackCashFlow({ payments });
             setResult(res);
         } catch (e: any) {

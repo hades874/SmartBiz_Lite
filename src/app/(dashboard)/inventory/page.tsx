@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { getInventoryRecommendations, type InventoryRecommendationsOutput } from "@/ai/flows/inventory-recommendations";
 import React from "react";
-import { mockInventory } from "@/lib/data";
+import { getInventory, addInventoryItem, updateInventoryItem, deleteInventoryItem } from "@/lib/sheets";
 import type { InventoryItem } from "@/types";
 import { Loader2, BellRing, PackageCheck, PlusCircle, MoreHorizontal } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -26,12 +26,14 @@ const formSchema = z.object({
     reorderLevel: z.coerce.number().min(0),
     costPrice: z.coerce.number().min(0),
     sellingPrice: z.coerce.number().min(0),
+    category: z.string().optional(),
 });
 
 type InventoryFormValues = z.infer<typeof formSchema>;
 
 export default function InventoryPage() {
-    const [inventory, setInventory] = React.useState<InventoryItem[]>(mockInventory);
+    const [inventory, setInventory] = React.useState<InventoryItem[]>([]);
+    const [isInventoryLoading, setIsInventoryLoading] = React.useState(true);
     const [loading, setLoading] = React.useState(false);
     const [result, setResult] = React.useState<InventoryRecommendationsOutput | null>(null);
     const [error, setError] = React.useState<string | null>(null);
@@ -50,12 +52,32 @@ export default function InventoryPage() {
             reorderLevel: 0,
             costPrice: 0,
             sellingPrice: 0,
+            category: "",
         },
     });
 
+    const fetchInventory = async () => {
+        setIsInventoryLoading(true);
+        try {
+            const items = await getInventory();
+            setInventory(items);
+        } catch (err: any) {
+            setError(err.message || 'Failed to load inventory.');
+        } finally {
+            setIsInventoryLoading(false);
+        }
+    };
+
+    React.useEffect(() => {
+        fetchInventory();
+    }, []);
+
     React.useEffect(() => {
         if (editingItem) {
-            form.reset(editingItem);
+            form.reset({
+                ...editingItem,
+                category: editingItem.category || '',
+            });
         } else {
             form.reset({
                 productName: "",
@@ -64,6 +86,7 @@ export default function InventoryPage() {
                 reorderLevel: 0,
                 costPrice: 0,
                 sellingPrice: 0,
+                category: "",
             });
         }
     }, [editingItem, form]);
@@ -87,24 +110,26 @@ export default function InventoryPage() {
         return inventory.find(item => item.id === productId);
     }
 
-    const onSubmit = (values: InventoryFormValues) => {
-        if (editingItem) {
-            // Update item
-            setInventory(prev => prev.map(item => item.id === editingItem.id ? { ...item, ...values } : item));
-            toast({ title: "Item Updated", description: `${values.productName} has been updated.` });
-        } else {
-            // Add new item
-            const newItem: InventoryItem = {
-                id: `p${inventory.length + 1}-${Date.now()}`,
-                status: 'ok', // Default status
-                ...values
-            };
-            setInventory(prev => [newItem, ...prev]);
-            toast({ title: "Item Added", description: `${values.productName} has been added to your inventory.` });
+    const onSubmit = async (values: InventoryFormValues) => {
+        setLoading(true);
+        try {
+            if (editingItem) {
+                const updated = await updateInventoryItem({ ...editingItem, ...values });
+                setInventory(prev => prev.map(item => item.id === editingItem.id ? updated : item));
+                toast({ title: "Item Updated", description: `${values.productName} has been updated.` });
+            } else {
+                const added = await addInventoryItem(values);
+                setInventory(prev => [added, ...prev]);
+                toast({ title: "Item Added", description: `${values.productName} has been added to your inventory.` });
+            }
+            setIsFormOpen(false);
+            setEditingItem(null);
+            form.reset();
+        } catch (err: any) {
+             toast({ variant: 'destructive', title: "Operation Failed", description: err.message });
+        } finally {
+            setLoading(false);
         }
-        setIsFormOpen(false);
-        setEditingItem(null);
-        form.reset();
     };
 
     const handleEdit = (item: InventoryItem) => {
@@ -112,9 +137,17 @@ export default function InventoryPage() {
         setIsFormOpen(true);
     };
 
-    const handleDelete = (itemId: string) => {
-        setInventory(prev => prev.filter(item => item.id !== itemId));
-        toast({ title: "Item Deleted", description: "The inventory item has been removed." });
+    const handleDelete = async (itemId: string) => {
+        setLoading(true);
+        try {
+            await deleteInventoryItem(itemId);
+            setInventory(prev => prev.filter(item => item.id !== itemId));
+            toast({ title: "Item Deleted", description: "The inventory item has been removed." });
+        } catch (err: any) {
+            toast({ variant: 'destructive', title: "Delete Failed", description: err.message });
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleOpenChange = (open: boolean) => {
@@ -187,21 +220,19 @@ export default function InventoryPage() {
                                             )}
                                         />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                          <FormField
-                                            control={form.control}
-                                            name="reorderLevel"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Reorder Level</FormLabel>
-                                                    <FormControl>
-                                                        <Input type="number" {...field} />
-                                                    </FormControl>
-                                                     <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
+                                    <FormField
+                                        control={form.control}
+                                        name="reorderLevel"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Reorder Level</FormLabel>
+                                                <FormControl>
+                                                    <Input type="number" {...field} />
+                                                </FormControl>
+                                                    <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                       <div className="grid grid-cols-2 gap-4">
                                         <FormField
                                             control={form.control}
@@ -230,17 +261,30 @@ export default function InventoryPage() {
                                             )}
                                         />
                                     </div>
+                                     <FormField
+                                        control={form.control}
+                                        name="category"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Category</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="e.g. Electronics" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                     <DialogFooter>
                                         <DialogClose asChild>
                                             <Button type="button" variant="ghost">Cancel</Button>
                                         </DialogClose>
-                                        <Button type="submit">{editingItem ? 'Save Changes' : 'Add Item'}</Button>
+                                        <Button type="submit" disabled={loading}>{loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}{editingItem ? 'Save Changes' : 'Add Item'}</Button>
                                     </DialogFooter>
                                 </form>
                             </Form>
                         </DialogContent>
                     </Dialog>
-                    <Button onClick={handleGetRecommendations} disabled={loading} type="button" variant="outline">
+                    <Button onClick={handleGetRecommendations} disabled={loading || isInventoryLoading} type="button" variant="outline">
                         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                         {t.getAIRecommendations}
                     </Button>
@@ -253,57 +297,63 @@ export default function InventoryPage() {
                     <CardDescription>{t.currentInventoryDescription}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Product</TableHead>
-                                <TableHead className="text-right">Stock</TableHead>
-                                <TableHead className="text-right">Reorder Level</TableHead>
-                                <TableHead className="text-right">Cost Price</TableHead>
-                                <TableHead className="text-right">Selling Price</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {inventory.map((item) => (
-                                <TableRow key={item.id}>
-                                    <TableCell className="font-medium">{item.productName}</TableCell>
-                                    <TableCell className="text-right">{item.currentStock} {item.unit}</TableCell>
-                                    <TableCell className="text-right">{item.reorderLevel} {item.unit}</TableCell>
-                                    <TableCell className="text-right">৳{item.costPrice.toLocaleString()}</TableCell>
-                                    <TableCell className="text-right">৳{item.sellingPrice.toLocaleString()}</TableCell>
-                                     <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                                    <span className="sr-only">Open menu</span>
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => handleEdit(item)}>
-                                                    Edit
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handleDelete(item.id)} className="text-destructive">
-                                                    Delete
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
+                    {isInventoryLoading ? (
+                        <div className="flex items-center justify-center py-8">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        </div>
+                     ) : (
+                         <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Product</TableHead>
+                                    <TableHead className="text-right">Stock</TableHead>
+                                    <TableHead className="text-right">Reorder Level</TableHead>
+                                    <TableHead className="text-right">Cost Price</TableHead>
+                                    <TableHead className="text-right">Selling Price</TableHead>
+                                    <TableHead className="w-[50px]"></TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {inventory.map((item) => (
+                                    <TableRow key={item.id}>
+                                        <TableCell className="font-medium">{item.productName}</TableCell>
+                                        <TableCell className="text-right">{item.currentStock} {item.unit}</TableCell>
+                                        <TableCell className="text-right">{item.reorderLevel} {item.unit}</TableCell>
+                                        <TableCell className="text-right">৳{item.costPrice.toLocaleString()}</TableCell>
+                                        <TableCell className="text-right">৳{item.sellingPrice.toLocaleString()}</TableCell>
+                                        <TableCell>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" className="h-8 w-8 p-0" disabled={loading}>
+                                                        <span className="sr-only">Open menu</span>
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem onClick={() => handleEdit(item)}>
+                                                        Edit
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleDelete(item.id)} className="text-destructive">
+                                                        Delete
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                     )}
                 </CardContent>
             </Card>
             
-            {loading && (
+            {(loading && !isInventoryLoading) && (
                  <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                  </div>
             )}
 
-            {error && (
+            {error && !isInventoryLoading && (
                 <Alert variant="destructive">
                     <AlertTitle>Error</AlertTitle>
                     <AlertDescription>{error}</AlertDescription>
@@ -356,7 +406,7 @@ export default function InventoryPage() {
                                     <BellRing /> {t.lowStock} Alerts
                                 </CardTitle>
                                 <CardDescription>Items that need immediate attention.</CardDescription>
-                            </CardHeader>
+                            </Header>
                             <CardContent>
                                {result.alerts.length > 0 ? (
                                     <ul className="space-y-2 list-disc list-inside text-sm text-destructive font-medium">

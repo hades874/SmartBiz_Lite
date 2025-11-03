@@ -12,23 +12,12 @@ import {
 } from "@/components/ui/card"
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 import { useLanguage, strings } from '@/context/language-context';
+import { SalesRecord } from '@/types';
+import { format, subMonths, parseISO } from 'date-fns';
 
-
-const generateMockSalesData = () => [
-    { month: "January", total: Math.floor(Math.random() * 5000) + 1000 },
-    { month: "February", total: Math.floor(Math.random() * 5000) + 1000 },
-    { month: "March", total: Math.floor(Math.random() * 5000) + 1000 },
-    { month: "April", total: Math.floor(Math.random() * 5000) + 1000 },
-    { month: "May", total: Math.floor(Math.random() * 5000) + 1000 },
-    { month: "June", total: Math.floor(Math.random() * 5000) + 1000 },
-    { month: "July", total: Math.floor(Math.random() * 5000) + 1000 },
-    { month: "August", total: Math.floor(Math.random() * 5000) + 1000 },
-    { month: "September", total: Math.floor(Math.random() * 5000) + 1000 },
-    { month: "October", total: Math.floor(Math.random() * 5000) + 1000 },
-    { month: "November", total: Math.floor(Math.random() * 5000) + 1000 },
-    { month: "December", total: Math.floor(Math.random() * 5000) + 1000 },
-];
-
+interface SalesChartProps {
+    salesData: SalesRecord[];
+}
 
 const chartConfig = {
     total: {
@@ -37,10 +26,43 @@ const chartConfig = {
     },
   }
 
-export function SalesChart() {
+export function SalesChart({ salesData }: SalesChartProps) {
   const { language } = useLanguage();
   const t = strings[language];
-  const mockSalesDataForChart = React.useMemo(() => generateMockSalesData(), []);
+
+  const monthlySalesData = React.useMemo(() => {
+    const monthlyTotals: { [key: string]: number } = {};
+    const twelveMonthsAgo = subMonths(new Date(), 11);
+
+    // Initialize last 12 months with 0 sales
+    for (let i = 0; i < 12; i++) {
+        const month = format(subMonths(new Date(), i), 'MMM yyyy');
+        monthlyTotals[month] = 0;
+    }
+
+    salesData.forEach(sale => {
+        const saleDate = parseISO(sale.date);
+        if (saleDate >= twelveMonthsAgo) {
+            const month = format(saleDate, 'MMM yyyy');
+            monthlyTotals[month] = (monthlyTotals[month] || 0) + sale.totalAmount;
+        }
+    });
+
+    return Object.keys(monthlyTotals).map(monthStr => {
+        const [monthName, year] = monthStr.split(' ');
+        return {
+            month: monthName,
+            year: parseInt(year),
+            total: monthlyTotals[monthStr]
+        }
+    }).sort((a,b) => new Date(a.year, getMonthIndex(a.month)).getTime() - new Date(b.year, getMonthIndex(b.month)).getTime());
+  }, [salesData]);
+  
+  const getMonthIndex = (monthName: string) => {
+    return new Date(`${monthName} 1, 2000`).getMonth();
+  }
+
+
   return (
     <Card>
         <CardHeader>
@@ -50,7 +72,7 @@ export function SalesChart() {
         <CardContent>
              <ChartContainer config={chartConfig} className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={mockSalesDataForChart} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                    <BarChart data={monthlySalesData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                         <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
                         <YAxis tickFormatter={(value) => `৳${value / 1000}k`} tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
                         <Tooltip

@@ -8,14 +8,18 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { mockInventory } from "@/lib/data"
 import { cn } from "@/lib/utils"
 import { useLanguage, strings } from "@/context/language-context";
+import { InventoryItem } from "@/types";
 
-export function InventoryAlerts() {
+interface InventoryAlertsProps {
+    inventory: InventoryItem[];
+}
+
+export function InventoryAlerts({ inventory }: InventoryAlertsProps) {
     const { language } = useLanguage();
     const t = strings[language];
-    const alerts = mockInventory.filter(item => item.status !== 'ok');
+    const alerts = inventory.filter(item => item.status !== 'ok');
 
     const getStatusText = (status: 'low' | 'overstock') => {
         if (status === 'low') return t.lowStock;
@@ -45,7 +49,7 @@ export function InventoryAlerts() {
                                 <Badge variant={item.status === 'low' ? 'destructive' : 'secondary'} className={cn(
                                     item.status === 'overstock' && 'bg-amber-500 text-white'
                                 )}>
-                                    {getStatusText(item.status)}
+                                    {getStatusText(item.status as 'low' | 'overstock')}
                                 </Badge>
                             </div>
                         ))}
