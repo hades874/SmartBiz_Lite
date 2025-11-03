@@ -156,7 +156,7 @@ export default function InventoryPage() {
             form.reset();
         }
         setIsFormOpen(open);
-    }
+    };
 
     return (
         <div className="space-y-6">
@@ -406,7 +406,7 @@ export default function InventoryPage() {
                                     <BellRing /> {t.lowStock} Alerts
                                 </CardTitle>
                                 <CardDescription>Items that need immediate attention.</CardDescription>
-                            </Header>
+                            </CardHeader>
                             <CardContent>
                                {result.alerts.length > 0 ? (
                                     <ul className="space-y-2 list-disc list-inside text-sm text-destructive font-medium">
@@ -425,3 +425,4 @@ export default function InventoryPage() {
         </div>
     );
 }
+
