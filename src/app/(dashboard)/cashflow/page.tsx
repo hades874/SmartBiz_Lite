@@ -6,24 +6,21 @@ import { Button } from "@/components/ui/button";
 import { trackCashFlow, type CashFlowOutput } from "@/ai/flows/cash-flow-tracking";
 import React from "react";
 import { getSales } from "@/lib/sheets";
-import type { Payment } from "@/types";
+import type { Payment, SalesRecord } from "@/types";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useLanguage, strings } from "@/context/language-context";
 
-function transformSalesToPayments(sales: any[]): Payment[] {
-    const payments: Payment[] = [];
-    sales.forEach(sale => {
-        payments.push({
-            id: `income-${sale.id}`,
-            date: sale.date,
-            type: 'income',
-            amount: sale.totalAmount,
-            category: 'Sales',
-            description: `Sale of ${sale.productName}`,
-            status: sale.paymentStatus === 'paid' ? 'completed' : sale.paymentStatus,
-        });
-    });
+function transformSalesToPayments(sales: SalesRecord[]): Payment[] {
+    const payments: Payment[] = sales.map(sale => ({
+        id: `income-${sale.id}`,
+        date: sale.date,
+        type: 'income',
+        amount: sale.totalAmount,
+        category: 'Sales',
+        description: `Sale of ${sale.productName}`,
+        status: sale.paymentStatus === 'paid' ? 'completed' : 'pending',
+    }));
 
     // Mock some expenses for a more realistic cash flow analysis
     payments.push({
