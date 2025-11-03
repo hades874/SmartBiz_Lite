@@ -13,7 +13,7 @@ import {
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 import { useLanguage, strings } from '@/context/language-context';
 import { SalesRecord } from '@/types';
-import { format, subMonths, parseISO } from 'date-fns';
+import { format, subMonths, getMonth, getYear, parseISO } from 'date-fns';
 
 interface SalesChartProps {
     salesData: SalesRecord[];
@@ -29,37 +29,47 @@ const chartConfig = {
 export function SalesChart({ salesData }: SalesChartProps) {
   const { language } = useLanguage();
   const t = strings[language];
-
-  const getMonthIndex = (monthName: string) => {
-    return new Date(`${monthName} 1, 2000`).getMonth();
+  
+  const getMonthName = (monthIndex: number) => {
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return monthNames[monthIndex];
   }
 
   const monthlySalesData = React.useMemo(() => {
     const monthlyTotals: { [key: string]: number } = {};
-    const twelveMonthsAgo = subMonths(new Date(), 11);
 
     // Initialize last 12 months with 0 sales
-    for (let i = 0; i < 12; i++) {
-        const month = format(subMonths(new Date(), i), 'MMM yyyy');
-        monthlyTotals[month] = 0;
+    const currentDate = new Date();
+    for (let i = 11; i >= 0; i--) {
+        const d = subMonths(currentDate, i);
+        const month = getMonth(d);
+        const year = getYear(d);
+        const key = `${year}-${month}`;
+        monthlyTotals[key] = 0;
     }
 
     salesData.forEach(sale => {
-        const saleDate = parseISO(sale.date);
-        if (saleDate >= twelveMonthsAgo) {
-            const month = format(saleDate, 'MMM yyyy');
-            monthlyTotals[month] = (monthlyTotals[month] || 0) + sale.totalAmount;
+        try {
+            const saleDate = parseISO(sale.date);
+            const month = getMonth(saleDate);
+            const year = getYear(saleDate);
+            const key = `${year}-${month}`;
+            if (key in monthlyTotals) {
+                monthlyTotals[key] += sale.totalAmount;
+            }
+        } catch (e) {
+            console.error(`Invalid date format for sale ID ${sale.id}: ${sale.date}`);
         }
     });
 
-    return Object.keys(monthlyTotals).map(monthStr => {
-        const [monthName, year] = monthStr.split(' ');
+    return Object.keys(monthlyTotals).map(key => {
+        const [year, monthIndex] = key.split('-').map(Number);
         return {
-            month: monthName,
-            year: parseInt(year),
-            total: monthlyTotals[monthStr]
+            month: getMonthName(monthIndex),
+            year: year,
+            total: monthlyTotals[key]
         }
-    }).sort((a,b) => new Date(a.year, getMonthIndex(a.month)).getTime() - new Date(b.year, getMonthIndex(b.month)).getTime());
+    });
   }, [salesData]);
   
   return (
