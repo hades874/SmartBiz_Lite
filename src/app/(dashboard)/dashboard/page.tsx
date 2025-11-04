@@ -9,6 +9,8 @@ import React from 'react';
 import { getSales, getCustomers, getInventory } from '@/lib/sheets';
 import { SalesRecord, Customer, InventoryItem } from '@/types';
 import { Loader2 } from 'lucide-react';
+import { formatCurrency, formatNumber } from '@/lib/utils';
+import { SalesChart } from '@/components/dashboard/sales-chart';
 
 export default function DashboardPage() {
   const { language } = useLanguage();
@@ -63,32 +65,37 @@ export default function DashboardPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <StatCard 
                 title={t.totalRevenue}
-                value={`৳${totalRevenue.toLocaleString()}`}
+                value={formatCurrency(totalRevenue, language)}
                 description={t.totalRevenueDescription}
                 Icon={DollarSign}
             />
             <StatCard 
                 title={t.activeCustomers}
-                value={`+${customers.length}`}
+                value={`+${formatNumber(customers.length, language)}`}
                 description={t.activeCustomersDescription}
                 Icon={Users}
             />
             <StatCard 
                 title={t.stockValue}
-                value={`৳${stockValue.toLocaleString()}`}
+                value={formatCurrency(stockValue, language)}
                 description={t.stockValueDescription}
                 Icon={Package}
             />
             <StatCard 
                 title={t.pendingPayments}
-                value={`৳${pendingPayments.toLocaleString()}`}
+                value={formatCurrency(pendingPayments, language)}
                 description={t.pendingPaymentsDescription}
                 Icon={CreditCard}
             />
         </div>
-        <div className="grid gap-4 md:gap-6 md:grid-cols-2">
-            <RecentSales sales={sales.slice(0,5)} />
-            <InventoryAlerts inventory={inventory} />
+        <div className="grid gap-4 md:gap-6 md:grid-cols-5">
+            <div className="md:col-span-3">
+              <SalesChart salesData={sales} />
+            </div>
+            <div className="md:col-span-2 grid gap-4">
+                <RecentSales sales={sales.slice(0,5)} />
+                <InventoryAlerts inventory={inventory} />
+            </div>
         </div>
     </div>
   )

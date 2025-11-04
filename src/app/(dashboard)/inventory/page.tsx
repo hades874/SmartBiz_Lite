@@ -18,6 +18,7 @@ import { z } from "zod";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage, strings } from "@/context/language-context";
+import { formatCurrency, formatNumber } from "@/lib/utils";
 
 const formSchema = z.object({
     productName: z.string().min(2, "Product name is required"),
@@ -317,10 +318,10 @@ export default function InventoryPage() {
                                 {inventory.map((item) => (
                                     <TableRow key={item.id}>
                                         <TableCell className="font-medium">{item.productName}</TableCell>
-                                        <TableCell className="text-right">{item.currentStock} {item.unit}</TableCell>
-                                        <TableCell className="text-right">{item.reorderLevel} {item.unit}</TableCell>
-                                        <TableCell className="text-right">৳{item.costPrice.toLocaleString()}</TableCell>
-                                        <TableCell className="text-right">৳{item.sellingPrice.toLocaleString()}</TableCell>
+                                        <TableCell className="text-right">{formatNumber(item.currentStock, language)} {item.unit}</TableCell>
+                                        <TableCell className="text-right">{formatNumber(item.reorderLevel, language)} {item.unit}</TableCell>
+                                        <TableCell className="text-right">{formatCurrency(item.costPrice, language)}</TableCell>
+                                        <TableCell className="text-right">{formatCurrency(item.sellingPrice, language)}</TableCell>
                                         <TableCell>
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
@@ -386,7 +387,7 @@ export default function InventoryPage() {
                                                 return (
                                                     <TableRow key={rec.productId}>
                                                         <TableCell className="font-medium">{product?.productName || rec.productId}</TableCell>
-                                                        <TableCell>{rec.reorderQuantity} {product?.unit}</TableCell>
+                                                        <TableCell>{formatNumber(rec.reorderQuantity, language)} {product?.unit}</TableCell>
                                                         <TableCell>{rec.reason}</TableCell>
                                                     </TableRow>
                                                 )

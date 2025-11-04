@@ -11,7 +11,7 @@ import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency, toBengaliNumber } from "@/lib/utils";
 import { useLanguage, strings } from "@/context/language-context";
 
 export default function CustomersPage() {
@@ -75,6 +75,15 @@ export default function CustomersPage() {
             return { ...customer, segment: segmentInfo?.segment };
         });
     }, [result, customers]);
+    
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        if (language === 'bn') {
+            return date.toLocaleDateString('bn-BD');
+        }
+        return date.toLocaleDateString();
+    }
+
 
     return (
         <div className="space-y-6">
@@ -126,8 +135,8 @@ export default function CustomersPage() {
                                 {customersWithSegments.map((customer) => (
                                     <TableRow key={customer.id}>
                                         <TableCell className="font-medium">{customer.name}</TableCell>
-                                        <TableCell>৳{customer.totalSpent.toLocaleString()}</TableCell>
-                                        <TableCell>{new Date(customer.lastPurchase).toLocaleDateString()}</TableCell>
+                                        <TableCell>{formatCurrency(customer.totalSpent, language)}</TableCell>
+                                        <TableCell>{formatDate(customer.lastPurchase)}</TableCell>
                                         <TableCell>
                                             {customer.segment ? (
                                                 <Badge variant={getSegmentVariant(customer.segment)} className={cn(customer.segment === 'high-value' && 'bg-green-600', 'capitalize')}>

@@ -8,7 +8,7 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
+import { cn, formatNumber } from "@/lib/utils"
 import { useLanguage, strings } from "@/context/language-context";
 import { InventoryItem } from "@/types";
 
@@ -43,7 +43,7 @@ export function InventoryAlerts({ inventory }: InventoryAlertsProps) {
                                 <div>
                                     <p className="text-sm font-medium">{item.productName}</p>
                                     <p className="text-sm text-muted-foreground">
-                                        Stock: {item.currentStock} {item.unit} (Reorder: {item.reorderLevel})
+                                        Stock: {formatNumber(item.currentStock, language)} {item.unit} (Reorder: {formatNumber(item.reorderLevel, language)})
                                     </p>
                                 </div>
                                 <Badge variant={item.status === 'low' ? 'destructive' : 'secondary'} className={cn(

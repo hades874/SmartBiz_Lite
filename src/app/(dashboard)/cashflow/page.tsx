@@ -10,6 +10,7 @@ import type { Payment, SalesRecord } from "@/types";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useLanguage, strings } from "@/context/language-context";
+import { formatCurrency } from "@/lib/utils";
 
 function transformSalesToPayments(sales: SalesRecord[]): Payment[] {
     const payments: Payment[] = sales.map(sale => ({
@@ -111,7 +112,7 @@ export default function CashflowPage() {
                             <CardTitle>{t.currentCashPosition}</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-3xl font-bold">৳{result.currentCashPosition.toLocaleString()}</p>
+                            <p className="text-3xl font-bold">{formatCurrency(result.currentCashPosition, language)}</p>
                         </CardContent>
                     </Card>
                      <Card>
@@ -119,7 +120,7 @@ export default function CashflowPage() {
                             <CardTitle>{t.thirtyDayProjection}</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-3xl font-bold">৳{result.thirtyDayProjection.toLocaleString()}</p>
+                            <p className="text-3xl font-bold">{formatCurrency(result.thirtyDayProjection, language)}</p>
                         </CardContent>
                     </Card>
                     <Card className="lg:col-span-1">

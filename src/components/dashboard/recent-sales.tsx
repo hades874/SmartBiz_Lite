@@ -15,6 +15,7 @@ import {
 import { useLanguage, strings } from "@/context/language-context";
 import { SalesRecord } from "@/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { formatCurrency } from "@/lib/utils";
 
 interface RecentSalesProps {
     sales: SalesRecord[];
@@ -49,7 +50,7 @@ export function RecentSales({ sales }: RecentSalesProps) {
                                 <p className="text-sm font-medium leading-none">{sale.customerName}</p>
                                 <p className="text-sm text-muted-foreground">{sale.productName}</p>
                             </div>
-                            <div className="ml-auto font-medium">+৳{sale.totalAmount.toLocaleString()}</div>
+                            <div className="ml-auto font-medium">+{formatCurrency(sale.totalAmount, language)}</div>
                         </div>
                     ))}
                 </div>

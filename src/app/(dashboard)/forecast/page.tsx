@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage, strings } from "@/context/language-context";
+import { formatCurrency } from "@/lib/utils";
 
 export default function ForecastPage() {
     const [loading, setLoading] = React.useState(false);
@@ -109,7 +110,7 @@ export default function ForecastPage() {
                                         {result.forecast.map((item) => (
                                             <TableRow key={item.productName}>
                                                 <TableCell className="font-medium">{item.productName}</TableCell>
-                                                <TableCell>৳{item.predictedSales.toLocaleString()}</TableCell>
+                                                <TableCell>{formatCurrency(item.predictedSales, language)}</TableCell>
                                                 <TableCell>
                                                     <Badge variant={getConfidenceVariant(item.confidence)} className="capitalize">{item.confidence}</Badge>
                                                 </TableCell>

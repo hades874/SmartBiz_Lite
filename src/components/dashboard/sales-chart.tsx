@@ -14,6 +14,7 @@ import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 import { useLanguage, strings } from '@/context/language-context';
 import { SalesRecord } from '@/types';
 import { format, subMonths, getMonth, getYear, parseISO } from 'date-fns';
+import { formatCurrency, toBengaliNumber } from '@/lib/utils';
 
 interface SalesChartProps {
     salesData: SalesRecord[];
@@ -32,7 +33,22 @@ export function SalesChart({ salesData }: SalesChartProps) {
   
   const getMonthName = (monthIndex: number) => {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const bnMonthNames = ["জানু", "ফেব্রু", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টে", "অক্টো", "নভে", "ডিসে"];
+    
+    if (language === 'bn') {
+        return bnMonthNames[monthIndex];
+    }
     return monthNames[monthIndex];
+  }
+  
+  const getMonthIndex = (monthName: string) => {
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const bnMonthNames = ["জানু", "ফেব্রু", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টে", "অক্টো", "নভে", "ডিসে"];
+    let index = monthNames.indexOf(monthName);
+    if (index === -1) {
+        index = bnMonthNames.indexOf(monthName);
+    }
+    return index;
   }
 
   const monthlySalesData = React.useMemo(() => {
@@ -70,7 +86,7 @@ export function SalesChart({ salesData }: SalesChartProps) {
             total: monthlyTotals[key]
         }
     });
-  }, [salesData]);
+  }, [salesData, language]);
   
   return (
     <Card>
@@ -83,11 +99,11 @@ export function SalesChart({ salesData }: SalesChartProps) {
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={monthlySalesData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                         <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-                        <YAxis tickFormatter={(value) => `৳${value / 1000}k`} tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                        <YAxis tickFormatter={(value) => language === 'bn' ? `৳${toBengaliNumber(value/1000)}k` : `৳${value / 1000}k`} tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
                         <Tooltip
                             cursor={false}
                             content={<ChartTooltipContent 
-                                formatter={(value) => `৳${value.toLocaleString()}`}
+                                formatter={(value) => formatCurrency(value as number, language)}
                                 indicator="dot"
                             />}
                         />
