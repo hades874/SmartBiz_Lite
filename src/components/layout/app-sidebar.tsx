@@ -113,11 +113,11 @@ export function AppSidebar() {
                                         <User />
                                     </AvatarFallback>
                                 </Avatar>
-                                <div className="text-left hidden group-data-[state=expanded]:block">
+                                <div className="text-left group-data-[state=collapsed]:hidden">
                                     <p className="text-sm font-medium">Welcome</p>
                                     <p className="text-xs text-muted-foreground truncate max-w-[150px]">{userEmail}</p>
                                 </div>
-                                <ChevronDown className="ml-auto h-4 w-4 hidden group-data-[state=expanded]:block" />
+                                <ChevronDown className="ml-auto h-4 w-4 group-data-[state=collapsed]:hidden" />
                                 </div>
                             </Button>
                         </PopoverTrigger>
