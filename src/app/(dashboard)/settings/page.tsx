@@ -64,7 +64,8 @@ export default function SettingsPage() {
                                 id="email"
                                 type="email"
                                 value={email || ''}
-                                disabled
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
                             />
                         </div>
                         <div className="grid gap-2">
