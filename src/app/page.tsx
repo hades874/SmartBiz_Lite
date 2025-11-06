@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
@@ -33,13 +33,22 @@ export default function LoginPage() {
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  useEffect(() => {
+    localStorage.removeItem('userEmail');
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    
+    const loginAndRedirect = (userEmail: string, message: string) => {
+        localStorage.setItem('userEmail', userEmail);
+        toast({ title: t.loginSuccess, description: message });
+        router.push('/dashboard');
+    }
 
     if (email === 'admin@gmail.com' && password === 'admin') {
-      toast({ title: t.loginSuccess, description: t.welcomeAdmin });
-      router.push('/dashboard');
+      loginAndRedirect(email, t.welcomeAdmin);
       return;
     }
 
@@ -47,8 +56,7 @@ export default function LoginPage() {
       const credentials = await getCredentials();
       const user = credentials.find(u => u.email === email && u.password === password);
       if (user) {
-        toast({ title: t.loginSuccess, description: t.welcomeBack });
-        router.push('/dashboard');
+        loginAndRedirect(user.email, t.welcomeBack);
       } else {
         toast({ variant: 'destructive', title: t.loginFailed, description: t.invalidCredentials });
         setLoading(false);

@@ -21,20 +21,27 @@ import {
     LogOut,
     ChevronDown,
     Bot,
+    User,
 } from "lucide-react"
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
-import { PlaceHolderImages } from "@/lib/placeholder-images"
+import { Avatar, AvatarFallback } from "../ui/avatar"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import { Button } from "../ui/button"
 import { useLanguage, strings } from "@/context/language-context"
+import React from "react"
 
 export function AppSidebar() {
     const pathname = usePathname()
-    const userAvatar = PlaceHolderImages.find(p => p.id === 'avatar-1')
     const { language } = useLanguage();
     const t = strings[language];
+    const [userEmail, setUserEmail] = React.useState<string | null>(null);
+
+    React.useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setUserEmail(localStorage.getItem('userEmail'));
+        }
+    }, []);
 
     const navItems = [
         { href: "/dashboard", icon: LayoutDashboard, label: t.dashboard },
@@ -102,12 +109,13 @@ export function AppSidebar() {
                             <Button variant="ghost" className="w-full justify-start h-auto p-2">
                                 <div className="flex items-center gap-3">
                                 <Avatar className="h-9 w-9">
-                                    <AvatarImage src={userAvatar?.imageUrl} alt="Karim" />
-                                    <AvatarFallback>K</AvatarFallback>
+                                    <AvatarFallback>
+                                        <User />
+                                    </AvatarFallback>
                                 </Avatar>
                                 <div className="text-left hidden group-data-[state=expanded]:block">
-                                    <p className="text-sm font-medium">Karim Ahmed</p>
-                                    <p className="text-xs text-muted-foreground">karim.a@example.com</p>
+                                    <p className="text-sm font-medium">Welcome</p>
+                                    <p className="text-xs text-muted-foreground truncate max-w-[150px]">{userEmail}</p>
                                 </div>
                                 <ChevronDown className="ml-auto h-4 w-4 hidden group-data-[state=expanded]:block" />
                                 </div>
