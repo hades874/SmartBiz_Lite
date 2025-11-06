@@ -77,7 +77,7 @@ export default function SettingsPage() {
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 required
                                 disabled={loading}
-                                placeholder="••••••••"
+                                placeholder="Enter Your New Password"
                             />
                         </div>
                          <div className="grid gap-2">
@@ -89,7 +89,7 @@ export default function SettingsPage() {
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
                                 disabled={loading}
-                                placeholder="••••••••"
+                                placeholder="Confirm Your New Password"
                             />
                         </div>
                     </div>
