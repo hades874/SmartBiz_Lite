@@ -2,7 +2,7 @@
 'use server';
 
 import { google } from 'googleapis';
-import { InventoryItem, Customer, SalesRecord } from '@/types';
+import { InventoryItem, Customer, SalesRecord, UserCredentials } from '@/types';
 
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
 
@@ -15,23 +15,6 @@ const auth = new google.auth.GoogleAuth({
 });
 
 const sheets = google.sheets({ version: 'v4', auth });
-
-// Helper function to map sheet rows to objects
-const rowsToObjects = (rows: any[][], headers: string[]) => {
-  return rows.map(row => {
-    const obj: { [key: string]: any } = {};
-    headers.forEach((header, i) => {
-      obj[header] = row[i];
-    });
-    return obj;
-  });
-};
-
-// Helper function to map objects to sheet rows
-const objectsToRows = (data: any[], headers: string[]) => {
-  return data.map(obj => headers.map(header => obj[header]));
-};
-
 
 // INVENTORY FUNCTIONS
 const INVENTORY_SHEET_NAME = 'Inventory';
@@ -127,8 +110,6 @@ export async function updateInventoryItem(item: InventoryItem): Promise<Inventor
 
 
 export async function deleteInventoryItem(id: string): Promise<void> {
-    // Note: Deleting rows in Google Sheets API is complex. 
-    // A common strategy is to clear the row's content instead.
     try {
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: SPREADSHEET_ID,
@@ -140,7 +121,7 @@ export async function deleteInventoryItem(id: string): Promise<void> {
             throw new Error('Could not find item to delete.');
         }
 
-        const rowIndex = idColumn.findIndex(row => row[0] === id) + 2; // +2 for 1-based index and header
+        const rowIndex = idColumn.findIndex(row => row[0] === id) + 2;
         if (rowIndex < 2) {
             throw new Error('Could not find item to delete.');
         }
@@ -156,9 +137,8 @@ export async function deleteInventoryItem(id: string): Promise<void> {
 }
 
 
-// CUSTOMER FUNCTIONS (you can add similar functions for customers and sales)
+// CUSTOMER FUNCTIONS
 const CUSTOMER_SHEET_NAME = 'Customers';
-const CUSTOMER_HEADERS = ['id', 'name', 'email', 'firstPurchase', 'lastPurchase', 'totalPurchases', 'totalSpent', 'averageOrderValue'];
 
 export async function getCustomers(): Promise<Customer[]> {
   try {
@@ -188,7 +168,6 @@ export async function getCustomers(): Promise<Customer[]> {
 
 // SALES FUNCTIONS
 const SALES_SHEET_NAME = 'Sales';
-const SALES_HEADERS = ['id', 'date', 'productName', 'productId', 'quantity', 'unitPrice', 'totalAmount', 'customerName', 'customerId', 'paymentStatus'];
 
 export async function getSales(): Promise<SalesRecord[]> {
   try {
@@ -216,4 +195,78 @@ export async function getSales(): Promise<SalesRecord[]> {
     console.error('Error fetching sales from Google Sheets:', error);
     throw new Error('Failed to fetch sales data.');
   }
+}
+
+
+// CREDENTIALS FUNCTIONS
+const CREDENTIALS_SHEET_NAME = 'credentials';
+
+export async function getCredentials(): Promise<UserCredentials[]> {
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${CREDENTIALS_SHEET_NAME}!A2:B`,
+    });
+    const rows = response.data.values;
+    if (!rows) return [];
+    return rows.map(row => ({
+      email: row[0],
+      password: row[1],
+    }));
+  } catch (error) {
+    console.error('Error fetching credentials from Google Sheets:', error);
+    throw new Error('Failed to fetch user credentials.');
+  }
+}
+
+export async function addUser(user: UserCredentials): Promise<void> {
+    try {
+        const existingUsers = await getCredentials();
+        if (existingUsers.some(u => u.email === user.email)) {
+            throw new Error('User with this email already exists.');
+        }
+
+        await sheets.spreadsheets.values.append({
+            spreadsheetId: SPREADSHEET_ID,
+            range: `${CREDENTIALS_SHEET_NAME}!A:B`,
+            valueInputOption: 'USER_ENTERED',
+            requestBody: {
+                values: [[user.email, user.password]],
+            },
+        });
+    } catch (error: any) {
+        console.error('Error adding user to Google Sheets:', error);
+        throw new Error(error.message || 'Failed to add user.');
+    }
+}
+
+export async function updatePassword(email: string, newPassword: string): Promise<void> {
+    try {
+        const response = await sheets.spreadsheets.values.get({
+            spreadsheetId: SPREADSHEET_ID,
+            range: `${CREDENTIALS_SHEET_NAME}!A2:A`,
+        });
+
+        const emailColumn = response.data.values;
+        if (!emailColumn) {
+            throw new Error('Could not find user to update.');
+        }
+
+        const rowIndex = emailColumn.findIndex(row => row[0] === email) + 2;
+        if (rowIndex < 2) {
+            throw new Error('User not found.');
+        }
+
+        await sheets.spreadsheets.values.update({
+            spreadsheetId: SPREADSHEET_ID,
+            range: `${CREDENTIALS_SHEET_NAME}!B${rowIndex}`,
+            valueInputOption: 'USER_ENTERED',
+            requestBody: {
+                values: [[newPassword]],
+            },
+        });
+    } catch (error: any) {
+        console.error('Error updating password in Google Sheets:', error);
+        throw new Error(error.message || 'Failed to update password.');
+    }
 }

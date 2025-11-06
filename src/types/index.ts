@@ -1,3 +1,4 @@
+
 export interface SalesRecord {
     id: string;
     date: string; // ISO 8601
@@ -49,5 +50,10 @@ export interface SalesRecord {
     totalSpent: number;
     averageOrderValue: number;
     segment?: 'high-value' | 'regular' | 'at-risk' | 'lost';
+  }
+  
+  export interface UserCredentials {
+    email: string;
+    password?: string;
   }
   
