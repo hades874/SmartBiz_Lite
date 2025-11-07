@@ -81,5 +81,5 @@ Follow these instructions to get a copy of the project up and running on your lo
 ### Default Login Credentials
 - **Admin**:
   - Email: `admin@gmail.com`
-  - Password: `admin`
+  - Password: `admin1`
 - **User**: Sign up new users via the admin flow on the login page.
