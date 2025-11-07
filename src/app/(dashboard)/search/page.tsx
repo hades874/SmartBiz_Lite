@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getSales, getInventory, getCustomers } from '@/lib/sheets';
 import { SalesRecord, InventoryItem, Customer } from '@/types';
@@ -19,7 +19,7 @@ type SearchResults = {
     customers: Customer[];
 };
 
-export default function SearchPage() {
+function SearchResultsComponent() {
     const searchParams = useSearchParams();
     const query = searchParams.get('q') || '';
     const { language } = useLanguage();
@@ -232,3 +232,18 @@ export default function SearchPage() {
     );
 }
 
+function SearchPageLoading() {
+    return (
+        <div className="flex items-center justify-center h-[calc(100vh-160px)]">
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        </div>
+    )
+}
+
+export default function SearchPage() {
+    return (
+        <Suspense fallback={<SearchPageLoading />}>
+            <SearchResultsComponent />
+        </Suspense>
+    )
+}
