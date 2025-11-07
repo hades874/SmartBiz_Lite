@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { Search, Bell } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
-import React from "react";
+import React, { useState } from "react";
 import { useLanguage, strings } from "@/context/language-context";
 
 
@@ -21,9 +21,17 @@ function toTitleCase(str: string) {
 
 export function Header() {
     const pathname = usePathname();
+    const router = useRouter();
     const segments = pathname.split('/').filter(Boolean);
     const { language, setLanguage } = useLanguage();
     const t = strings[language];
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && searchQuery.trim()) {
+            router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
 
     const getPageTitle = (segment: string) => {
         switch (segment) {
@@ -43,6 +51,8 @@ export function Header() {
                 return t.aiAgent;
             case 'settings':
                 return t.settings;
+            case 'search':
+                return t.search;
             default:
                 return toTitleCase(segment);
         }
@@ -85,6 +95,9 @@ export function Header() {
                         type="search"
                         placeholder="Search..."
                         className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px] bg-background"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={handleSearch}
                     />
                 </div>
                  <DropdownMenu>

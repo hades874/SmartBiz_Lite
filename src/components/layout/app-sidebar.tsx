@@ -22,6 +22,7 @@ import {
     ChevronDown,
     Bot,
     User,
+    Search,
 } from "lucide-react"
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
@@ -62,6 +63,17 @@ export function AppSidebar() {
             </SidebarHeader>
             <SidebarContent className="p-2">
                 <SidebarMenu>
+                     <SidebarMenuItem>
+                        <Link href="/search">
+                            <SidebarMenuButton
+                                isActive={pathname.startsWith('/search')}
+                                tooltip={t.search}
+                            >
+                                <Search />
+                                <span>{t.search}</span>
+                            </SidebarMenuButton>
+                        </Link>
+                    </SidebarMenuItem>
                     {navItems.map((item) => (
                         <SidebarMenuItem key={item.href}>
                             <Link href={item.href}>
