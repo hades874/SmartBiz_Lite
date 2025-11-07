@@ -202,23 +202,36 @@ export async function getSales(): Promise<SalesRecord[]> {
 const PENDING_PAYMENTS_SHEET_NAME = 'pendingPayments';
 
 export async function getPendingPayments(): Promise<number> {
-  try {
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: SPREADSHEET_ID,
-      range: `${PENDING_PAYMENTS_SHEET_NAME}!A1`,
-    });
-
-    const value = response.data.values?.[0]?.[0];
-    if (!value) return 0;
-    
-    // Remove any currency symbols or commas before parsing
-    const numericValue = value.replace(/[^0-9.-]+/g,"");
-    return parseFloat(numericValue) || 0;
-  } catch (error) {
-    console.error('Error fetching pending payments from Google Sheets:', error);
-    throw new Error('Failed to fetch pending payments data.');
+    try {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${PENDING_PAYMENTS_SHEET_NAME}!H:H`,
+      });
+  
+      const rows = response.data.values;
+      if (!rows || rows.length === 0) {
+        return 0;
+      }
+      
+      // Sum all values in the column, skipping the header if it exists
+      const total = rows
+        .slice(1) // Skip header row
+        .reduce((sum, row) => {
+          if (row[0]) {
+            // Remove any currency symbols or commas before parsing
+            const numericValue = String(row[0]).replace(/[^0-9.-]+/g,"");
+            const value = parseFloat(numericValue);
+            return sum + (isNaN(value) ? 0 : value);
+          }
+          return sum;
+        }, 0);
+  
+      return total;
+    } catch (error) {
+      console.error('Error fetching pending payments from Google Sheets:', error);
+      throw new Error('Failed to fetch pending payments data.');
+    }
   }
-}
 
 
 // CREDENTIALS FUNCTIONS
