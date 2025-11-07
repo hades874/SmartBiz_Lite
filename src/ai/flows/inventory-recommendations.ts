@@ -41,7 +41,7 @@ const inventoryRecommendationsPrompt = ai.definePrompt({
   name: 'inventoryRecommendationsPrompt',
   input: {schema: InventoryRecommendationsInputSchema},
   output: {schema: InventoryRecommendationsOutputSchema},
-  prompt: `You are an AI assistant helping a distributor manage their inventory. Your response must be in the Bangla language.
+  prompt: `You are an AI assistant helping a distributor in Bangladesh manage their inventory. Your response must be in the Bangla language and tailored for a Bangladeshi audience.
   Analyze the following inventory data and provide reorder recommendations and low stock alerts.
 
   Inventory Data:

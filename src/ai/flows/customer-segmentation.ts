@@ -45,7 +45,7 @@ const prompt = ai.definePrompt({
   name: 'customerSegmentationPrompt',
   input: {schema: CustomerSegmentationInputSchema},
   output: {schema: CustomerSegmentationOutputSchema},
-  prompt: `You are an expert business analyst specializing in customer segmentation. Your response must be in the Bangla language.
+  prompt: `You are an expert business analyst specializing in customer segmentation for businesses in Bangladesh. Your response must be in the Bangla language.
 
 Analyze the provided customer data and segment each customer into one of the following categories:
 - high-value: Customers with high total spending and recent purchase activity.

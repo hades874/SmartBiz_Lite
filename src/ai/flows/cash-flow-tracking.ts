@@ -51,7 +51,7 @@ const cashFlowTrackingPrompt = ai.definePrompt({
   name: 'cashFlowTrackingPrompt',
   input: {schema: CashFlowInputSchema},
   output: {schema: CashFlowOutputSchema},
-  prompt: `You are a business analyst specializing in cash flow management for SMEs. Your response must be in the Bangla language.
+  prompt: `You are a business analyst specializing in cash flow management for SMEs in Bangladesh. Your response must be in the Bangla language and tailored for a Bangladeshi audience.
 
   Analyze the following payment data to provide insights into the business's financial health.
 
