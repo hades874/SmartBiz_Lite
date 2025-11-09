@@ -161,27 +161,19 @@ const parseSheetDate = (dateValue: any): string | null => {
     if (!dateValue && dateValue !== 0) {
       return null;
     }
-  
-    // Handle Google Sheet's date serial number format.
     if (typeof dateValue === 'number') {
-      // The number of days between Jan 1 1900 and Jan 1 1970, accounting for Excel's 1900 leap year bug.
       const excelEpoch = 25569; 
       const daysSinceEpoch = dateValue - excelEpoch;
       const millisecondsSinceEpoch = daysSinceEpoch * 24 * 60 * 60 * 1000;
       const date = new Date(millisecondsSinceEpoch);
-      // Check if the parsed date is valid before returning
-      return !isNaN(date.getTime()) ? date.toISOString() : null;
+      return !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : null;
     }
-  
-    // Handle string dates (e.g., 'YYYY-MM-DD', 'MM/DD/YYYY')
     if (typeof dateValue === 'string') {
       const date = new Date(dateValue);
       if (!isNaN(date.getTime())) {
-        return date.toISOString();
+        return date.toISOString().split('T')[0];
       }
     }
-  
-    // If all parsing fails, return null
     return null;
   };
 
@@ -202,7 +194,7 @@ export async function getCustomers(): Promise<Customer[]> {
       name: row[1],
       email: row[2],
       firstPurchase: parseSheetDate(row[3]),
-      lastPurchase: parseSheetDate(row[4]),
+      lastPurchase: row[4] || null,
       totalPurchases: parseInt(row[5], 10) || 0,
       totalSpent: parseFloat(row[6]) || 0,
       averageOrderValue: parseFloat(row[7]) || 0,

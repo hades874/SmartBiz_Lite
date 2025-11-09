@@ -83,19 +83,6 @@ export default function CustomersPage() {
             return { ...customer, segment };
         });
     }, [result, customers]);
-    
-    const formatDate = (dateString: string | null | undefined) => {
-        if (!dateString) return 'N/A';
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) {
-            return 'N/A';
-        }
-        return date.toLocaleDateString(language === 'bn' ? 'bn-BD' : 'en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    }
 
 
     return (
@@ -149,7 +136,7 @@ export default function CustomersPage() {
                                     <TableRow key={customer.id}>
                                         <TableCell className="font-medium">{customer.name}</TableCell>
                                         <TableCell>{formatCurrency(customer.totalSpent, language)}</TableCell>
-                                        <TableCell>{formatDate(customer.lastPurchase)}</TableCell>
+                                        <TableCell>{customer.lastPurchase || 'N/A'}</TableCell>
                                         <TableCell>
                                             {customer.segment ? (
                                                 <Badge variant={getSegmentVariant(customer.segment)} className={cn(customer.segment === 'high-value' && 'bg-green-600 text-white', 'capitalize')}>
@@ -169,5 +156,3 @@ export default function CustomersPage() {
         </div>
     );
 }
-
-    
