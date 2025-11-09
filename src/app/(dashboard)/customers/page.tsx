@@ -84,15 +84,21 @@ export default function CustomersPage() {
         });
     }, [result, customers]);
     
-    const formatDate = (dateString: string) => {
+    const formatDate = (dateString: string | null | undefined) => {
+        if (!dateString) return 'N/A';
         const date = new Date(dateString);
+        // Check if the date is the epoch date, which we use as a fallback for invalid/empty dates
+        if (date.getTime() === 0) {
+            return 'N/A';
+        }
         if (isNaN(date.getTime())) {
-            return "Invalid Date";
+            return 'Invalid Date';
         }
-        if (language === 'bn') {
-            return date.toLocaleDateString('bn-BD');
-        }
-        return date.toLocaleDateString();
+        return date.toLocaleDateString(language === 'bn' ? 'bn-BD' : 'en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
     }
 
 
@@ -149,7 +155,7 @@ export default function CustomersPage() {
                                         <TableCell>{formatCurrency(customer.totalSpent, language)}</TableCell>
                                         <TableCell>{formatDate(customer.lastPurchase)}</TableCell>
                                         <TableCell>
-                                            {customer.segment ? (
+                                            {customer..segment ? (
                                                 <Badge variant={getSegmentVariant(customer.segment)} className={cn(customer.segment === 'high-value' && 'bg-green-600 text-white', 'capitalize')}>
                                                     {customer.segment.replace('-', ' ')}
                                                 </Badge>
@@ -167,3 +173,5 @@ export default function CustomersPage() {
         </div>
     );
 }
+
+    

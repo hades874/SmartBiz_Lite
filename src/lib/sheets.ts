@@ -157,31 +157,33 @@ export async function deleteInventoryItem(id: string): Promise<void> {
 // CUSTOMER FUNCTIONS
 const CUSTOMER_SHEET_NAME = 'Customers';
 
-// Helper function to parse dates from sheets.
-// Google Sheets dates might come as strings 'YYYY-MM-DD' or serial numbers.
-// This function handles both and returns an ISO string.
 const parseSheetDate = (dateValue: any): string => {
-    if (!dateValue) {
-      return new Date(0).toISOString(); // Return epoch if empty to avoid errors
+    if (!dateValue && dateValue !== 0) {
+      return new Date(0).toISOString();
     }
-    // Check if it's a number (Excel/Sheets date serial number)
-    if (typeof dateValue === 'number' && dateValue > 0) {
-      // Excel's epoch starts on 1900-01-01, but has a bug treating 1900 as a leap year.
-      // The conversion is (dateValue - 25569) * 86400 * 1000.
-      const utc_days = dateValue - 25569;
-      const utc_value = utc_days * 86400;
-      const date_info = new Date(utc_value * 1000);
-      return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate()).toISOString();
-    }
-    // If it's a string, try creating a date from it.
-    // This will handle 'YYYY-MM-DD' and other standard formats.
-    const date = new Date(dateValue);
-    if (!isNaN(date.getTime())) {
+  
+    // Handle Google Sheet's date serial number format.
+    if (typeof dateValue === 'number') {
+      // The number of days between Jan 1 1900 and Jan 1 1970, accounting for Excel's 1900 leap year bug.
+      const excelEpoch = 25569; 
+      const daysSinceEpoch = dateValue - excelEpoch;
+      const millisecondsSinceEpoch = daysSinceEpoch * 24 * 60 * 60 * 1000;
+      const date = new Date(millisecondsSinceEpoch);
       return date.toISOString();
     }
-    // Return epoch if all else fails
+  
+    // Handle string dates (e.g., 'YYYY-MM-DD', 'MM/DD/YYYY')
+    if (typeof dateValue === 'string') {
+      // Allow browsers to attempt parsing, as it handles many formats.
+      const date = new Date(dateValue);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString();
+      }
+    }
+  
+    // If parsing fails, return epoch as a fallback to prevent crashes.
     return new Date(0).toISOString();
-};
+  };
 
 
 export async function getCustomers(): Promise<Customer[]> {
@@ -228,7 +230,7 @@ export async function getSales(): Promise<SalesRecord[]> {
     
     return rows.map(row => ({
       id: row[0],
-      date: row[1],
+      date: parseSheetDate(row[1]),
       productName: row[2],
       productId: row[3],
       quantity: parseInt(row[4], 10),
@@ -356,5 +358,7 @@ export async function updatePassword(email: string, newPassword: string): Promis
         throw new Error(error.message || 'Failed to update password.');
     }
 }
+
+    
 
     
