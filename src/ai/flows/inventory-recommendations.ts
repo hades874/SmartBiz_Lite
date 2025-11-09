@@ -50,15 +50,15 @@ const inventoryRecommendationsPrompt = ai.definePrompt({
   {{/each}}
 
   Recommendations:
-  - Provide a reorder quantity for each product that is below its reorder level. The ID must be returned as 'productId'.
-  - Explain the reasoning behind each reorder recommendation.
+  - Provide a reorder quantity for each product where the 'currentStock' is below its 'reorderLevel'. The ID must be returned as 'productId'.
+  - Explain the reasoning behind each reorder recommendation (e.g., "Stock is below reorder point").
 
   Alerts:
-  - Generate alerts for products that are critically low in stock (e.g., less than 10% of reorder level).
+  - Generate a concise alert message for each product where the 'currentStock' is below its 'reorderLevel'.
 
   Format your response as a JSON object with "recommendations" and "alerts" fields.
   The "recommendations" field should be an array of objects with "productId", "reorderQuantity", and "reason" fields.
-  The "alerts" field should be an array of strings, each representing a low stock alert.
+  The "alerts" field should be an array of strings, each representing a low stock alert (e.g., "Premium Wireless Mouse is low on stock.").
   `,
 });
 
