@@ -1,20 +1,33 @@
 
 'use server';
 
-import { google } from 'googleapis';
+import { google, sheets_v4 } from 'googleapis';
+import { JWT } from 'google-auth-library';
 import { InventoryItem, Customer, SalesRecord, UserCredentials } from '@/types';
 
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
 
-const auth = new google.auth.GoogleAuth({
-  credentials: {
-    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  },
-  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-});
+let sheetsClient: sheets_v4.Sheets | null = null;
 
-const sheets = google.sheets({ version: 'v4', auth });
+async function getSheetsClient(): Promise<sheets_v4.Sheets> {
+  if (sheetsClient) {
+    return sheetsClient;
+  }
+
+  const auth = new google.auth.GoogleAuth({
+    credentials: {
+      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    },
+    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+  });
+
+  const client = await auth.getClient();
+  sheetsClient = google.sheets({ version: 'v4', auth: client as JWT });
+  
+  return sheetsClient;
+}
+
 
 // INVENTORY FUNCTIONS
 const INVENTORY_SHEET_NAME = 'Inventory';
@@ -22,6 +35,7 @@ const INVENTORY_HEADERS = ['id', 'productName', 'currentStock', 'unit', 'reorder
 
 export async function getInventory(): Promise<InventoryItem[]> {
   try {
+    const sheets = await getSheetsClient();
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range: `${INVENTORY_SHEET_NAME}!A2:J`,
@@ -50,6 +64,7 @@ export async function getInventory(): Promise<InventoryItem[]> {
 
 export async function addInventoryItem(item: Omit<InventoryItem, 'id' | 'status'>): Promise<InventoryItem> {
   try {
+    const sheets = await getSheetsClient();
     const newId = `p${Date.now()}`;
     const status = parseInt(String(item.currentStock), 10) < parseInt(String(item.reorderLevel), 10) ? 'low' : 'ok';
     const newItem: InventoryItem = { ...item, id: newId, status };
@@ -73,6 +88,7 @@ export async function addInventoryItem(item: Omit<InventoryItem, 'id' | 'status'
 
 export async function updateInventoryItem(item: InventoryItem): Promise<InventoryItem> {
     try {
+        const sheets = await getSheetsClient();
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: SPREADSHEET_ID,
             range: `${INVENTORY_SHEET_NAME}!A2:A`,
@@ -111,6 +127,7 @@ export async function updateInventoryItem(item: InventoryItem): Promise<Inventor
 
 export async function deleteInventoryItem(id: string): Promise<void> {
     try {
+        const sheets = await getSheetsClient();
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: SPREADSHEET_ID,
             range: `${INVENTORY_SHEET_NAME}!A2:A`,
@@ -142,6 +159,7 @@ const CUSTOMER_SHEET_NAME = 'Customers';
 
 export async function getCustomers(): Promise<Customer[]> {
   try {
+    const sheets = await getSheetsClient();
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range: `${CUSTOMER_SHEET_NAME}!A2:J`,
@@ -172,6 +190,7 @@ const SALES_SHEET_NAME = 'Sales';
 
 export async function getSales(): Promise<SalesRecord[]> {
   try {
+    const sheets = await getSheetsClient();
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range: `${SALES_SHEET_NAME}!A2:J`,
@@ -203,6 +222,7 @@ const PENDING_PAYMENTS_SHEET_NAME = 'pendingPayments';
 
 export async function getPendingPayments(): Promise<number> {
     try {
+      const sheets = await getSheetsClient();
       const response = await sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
         range: `${PENDING_PAYMENTS_SHEET_NAME}!H:H`,
@@ -239,6 +259,7 @@ const CREDENTIALS_SHEET_NAME = 'credentials';
 
 export async function getCredentials(): Promise<UserCredentials[]> {
   try {
+    const sheets = await getSheetsClient();
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range: `${CREDENTIALS_SHEET_NAME}!A2:B`,
@@ -257,6 +278,7 @@ export async function getCredentials(): Promise<UserCredentials[]> {
 
 export async function addUser(user: UserCredentials): Promise<void> {
     try {
+        const sheets = await getSheetsClient();
         const existingUsers = await getCredentials();
         if (existingUsers.some(u => u.email === user.email)) {
             throw new Error('User with this email already exists.');
@@ -278,6 +300,7 @@ export async function addUser(user: UserCredentials): Promise<void> {
 
 export async function updatePassword(email: string, newPassword: string): Promise<void> {
     try {
+        const sheets = await getSheetsClient();
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: SPREADSHEET_ID,
             range: `${CREDENTIALS_SHEET_NAME}!A2:A`,
