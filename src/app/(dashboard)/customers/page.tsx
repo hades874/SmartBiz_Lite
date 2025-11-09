@@ -155,7 +155,7 @@ export default function CustomersPage() {
                                         <TableCell>{formatCurrency(customer.totalSpent, language)}</TableCell>
                                         <TableCell>{formatDate(customer.lastPurchase)}</TableCell>
                                         <TableCell>
-                                            {customer..segment ? (
+                                            {customer.segment ? (
                                                 <Badge variant={getSegmentVariant(customer.segment)} className={cn(customer.segment === 'high-value' && 'bg-green-600 text-white', 'capitalize')}>
                                                     {customer.segment.replace('-', ' ')}
                                                 </Badge>
