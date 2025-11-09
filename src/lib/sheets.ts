@@ -158,14 +158,15 @@ export async function deleteInventoryItem(id: string): Promise<void> {
 const CUSTOMER_SHEET_NAME = 'Customers';
 
 const parseSheetDate = (dateValue: any): string | null => {
-    if (dateValue === null || dateValue === undefined || dateValue === '') {
+    if (!dateValue) {
         return null;
     }
-    // Handle Google Sheets numeric date format
+    // Handle Google Sheets numeric date format (days since 1899-12-30)
     if (typeof dateValue === 'number') {
-        // The Excel/Sheets epoch starts on 1899-12-30, not 1900-01-01.
-        // JS epoch is 1970-01-01. Days between them is 25569.
-        const date = new Date((dateValue - 25569) * 86400 * 1000);
+        const excelEpoch = new Date(1899, 11, 30);
+        const date = new Date(excelEpoch.getTime() + dateValue * 24 * 60 * 60 * 1000);
+        // Adjust for timezone offset to get UTC date
+        date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
         return isNaN(date.getTime()) ? null : date.toISOString().split('T')[0];
     }
     // Handle string dates (e.g., 'YYYY-MM-DD', 'MM/DD/YYYY')
@@ -175,7 +176,7 @@ const parseSheetDate = (dateValue: any): string | null => {
             return date.toISOString().split('T')[0];
         }
     }
-    return String(dateValue); // Return as string if parsing fails
+    return String(dateValue); // Fallback for unexpected formats
 };
 
 
@@ -195,11 +196,11 @@ export async function getCustomers(): Promise<Customer[]> {
       name: row[1],
       email: row[2],
       firstPurchase: parseSheetDate(row[3]),
-      lastPurchase: row[4] || null,
+      lastPurchase: parseSheetDate(row[4]),
       totalPurchases: parseInt(row[5], 10) || 0,
       totalSpent: parseFloat(row[6]) || 0,
       averageOrderValue: parseFloat(row[7]) || 0,
-      segment: row[9] || undefined,
+      segment: row[9] as 'high-value' | 'regular' | 'at-risk' | 'lost' | undefined,
     }));
   } catch (error) {
     console.error('Error fetching customers from Google Sheets:', error);

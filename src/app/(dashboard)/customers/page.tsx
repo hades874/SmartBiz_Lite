@@ -7,7 +7,7 @@ import { customerSegmentation, type CustomerSegmentationOutput } from "@/ai/flow
 import React from "react";
 import { getCustomers } from "@/lib/sheets";
 import type { Customer } from "@/types";
-import { Loader2, Lightbulb, Target, CheckCircle } from "lucide-react";
+import { Loader2, Lightbulb, Target } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -46,11 +46,7 @@ export default function CustomersPage() {
         setResult(null);
         try {
             // Omit the 'segment' property before sending to the AI
-            const customersToSegment = customers.map(({ segment, ...c }) => ({
-                ...c,
-                firstPurchase: c.firstPurchase || null,
-                lastPurchase: c.lastPurchase || null,
-            }));
+            const customersToSegment = customers.map(({ segment, ...c }) => c);
 
             if (customersToSegment.length > 0) {
                  const res = await customerSegmentation({ customerData: customersToSegment });
